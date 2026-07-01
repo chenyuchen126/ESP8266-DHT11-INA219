@@ -1,0 +1,14 @@
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  var voltage = e.parameter.voltage;
+  var current = e.parameter.current;
+  var power   = e.parameter.power;
+  var temp    = e.parameter.temp;
+  var humi    = e.parameter.humi;
+  
+  sheet.appendRow([new Date(), voltage, current, power, temp, humi]);
+  
+  // 💡 關鍵是這行：必須把確認訊息 return 回去！
+  return ContentService.createTextOutput("Data successfully updated to Sheet!");
+}
