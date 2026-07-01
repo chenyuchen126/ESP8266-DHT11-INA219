@@ -9,7 +9,7 @@
 const char* ssid = "STUDENT-C2-3";
 const char* password = "28721940";
 // 填入您部署的 Google Apps Script ID (即 /macros/s/ 與 /exec 之間那一長串字串)
-const char* GScriptID = "AKfycbxj8ZOR9xdbyEMEvPoi01b7QOQ6ZXY0etCOHzpu17qpAHZ1ZgEmtFTG0sKBN70D5lQO9Q"; 
+const char* GScriptID = "YOUR TOKEN"; 
 
 // 2. 初始化感測器腳位
 #define DHTPIN D4        // DHT11 DATA 腳位接在 WeMos D4 (GPIO2)
@@ -49,6 +49,17 @@ void loop() {
     float current_mA = ina219.getCurrent_mA();
     float power_mW = ina219.getPower_mW();
 
+    if (!ina219.begin()) {
+      Serial.println("警告：找不到 INA219 晶片，請檢查接線！");
+    }
+
+    // 加上這行：明確設定量測區間（預設為 32V, 2A 範圍）
+    // 這會重新寫入 INA219 的校正暫存器，激活內部的功率計算功能
+    ina219.setCalibration_32V_2A();
+    // 手動用電壓(V) * 電流(mA) 算出功率(mW)
+    float manual_power_mW = busvoltage * current_mA;
+    
+    
     // 讀取 DHT11 溫溼度數據
     float temp = dht.readTemperature();
     float humi = dht.readHumidity();
@@ -73,7 +84,7 @@ void loop() {
     String url = "https://script.google.com/macros/s/" + String(GScriptID) + "/exec?";
     url += "voltage=" + String(busvoltage);
     url += "&current=" + String(current_mA);
-    url += "&power=" + String(power_mW);
+    url += "&power=" + String(manual_power_mW);
     url += "&temp=" + String(temp);
     url += "&humi=" + String(humi);
 
